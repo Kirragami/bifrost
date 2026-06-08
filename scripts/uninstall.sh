@@ -7,8 +7,8 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-APP_DIR="/opt/bifrost"
-BIN_TARGET="/usr/local/bin/bifrost"
+APP_DIR="$HOME/.local/share/bifrost"
+BIN_TARGET="$HOME/.local/bin/bifrost"
 
 echo "==> Uninstalling Bifrost..."
 
