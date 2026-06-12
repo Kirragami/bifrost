@@ -2,11 +2,6 @@
 
 set -e
 
-if [ "$EUID" -ne 0 ]; then 
-  echo "Please run as root (sudo ./uninstall.sh)"
-  exit 1
-fi
-
 APP_DIR="$HOME/.local/share/bifrost"
 BIN_TARGET="$HOME/.local/bin/bifrost"
 
