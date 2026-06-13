@@ -15,29 +15,17 @@ Commands:
 """)
 
 def cmd_call(args):
-    if args != 'reload' and len(args) != 1:
+    if len(args) != 1:
         print("Usage: bifrost call <plugin-name>")
         return
     plugin_name = args[0]
-    try:
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
-            sock.settimeout(2.0)
-            sock.connect('/tmp/bifrost.sock')
-            sock.sendall(plugin_name.encode())
-            print(f"Sent: {plugin_name}")
-    except (FileNotFoundError, ConnectionRefusedError):
-        print("Error: Bifrost daemon is not running.")
-    except socket.timeout:
-        print("Error: Daemon did not respond in time.")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-
+    send_to_daemon(plugin_name)
+    
 def cmd_link(args):
     print("Linking logic goes here...")
 
 def cmd_reload(args):
-    cmd_call('reload')
-
+    send_to_daemon('reload')
 
 def main():
     if len(sys.argv) < 2:
@@ -64,6 +52,22 @@ def main():
     else:
         print(f"Unknown command: {cmd_name}")
         sys.exit(1)
+
+def send_to_daemon(command):
+    if not command:
+        return
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.settimeout(2.0)
+            sock.connect('/tmp/bifrost.sock')
+            sock.sendall(command.encode())
+            print(f"Sent: {command}")
+    except (FileNotFoundError, ConnectionRefusedError):
+        print("Error: Bifrost daemon is not running.")
+    except socket.timeout:
+        print("Error: Daemon did not respond in time.")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
 if __name__ == "__main__":
     main()
