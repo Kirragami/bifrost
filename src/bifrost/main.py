@@ -13,10 +13,7 @@ def register_plugins(registry):
     importlib.reload(bifrost.plugins)
     registry.clear()
     for loader, name, is_pkg in pkgutil.iter_modules(bifrost.plugins.__path__):
-        print(f"Checking in {bifrost.plugins.__path__}")
-        print(name)
         module = importlib.import_module(f"bifrost.plugins.{name}")
-        print("imported ig?")
         for func_name, func in inspect.getmembers(module, inspect.isfunction):
             if getattr(func, "_is_plugin", False):
                 registry.register(func.__name__, func)
