@@ -22,7 +22,28 @@ def cmd_call(args):
     send_to_daemon(plugin_name)
     
 def cmd_link(args):
-    print("Linking logic goes here...")
+    target_dir = "bifrost"
+    # Just let this one slide, I don't wanna deal with path problems currently :'))
+    app_dir = os.path.expanduser("~/.local/share/bifrost/src/bifrost")
+    src_settings = os.path.join(app_dir, "config/settings.py")
+    src_plugins = os.path.join(app_dir, "plugins")
+
+    if not os.path.exists(src_settings) or not os.path.exists(src_plugins):
+        print(f"Error: Could not find settings.py or plugins/ in {app_dir}")
+        return
+    
+    if os.path.exists(target_dir):
+        print(f"Error: Directory {target_dir} already exists.")
+
+    try:
+        os.makedirs(target_dir)
+
+        os.symlink(src_settings, os.path.join(target_dir, "settings.py"))
+        os.symlink(src_plugins, os.path.join(target_dir, "plugins"))
+
+        print(f"Bifrost workplace initialized in ./{target_dir}")
+    except OSError as e:
+        print("Failed to create workspace")
 
 def cmd_reload(args):
     if len(args) != 0:
