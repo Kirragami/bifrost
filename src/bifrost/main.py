@@ -11,15 +11,16 @@ from bifrost.core.registry import Registry
 def register_plugins(registry):
     importlib.invalidate_caches()
     importlib.reload(bifrost.plugins)
+    registry.clear()
     for loader, name, is_pkg in pkgutil.iter_modules(bifrost.plugins.__path__):
         print(f"Checking in {bifrost.plugins.__path__}")
         print(name)
         module = importlib.import_module(f"bifrost.plugins.{name}")
         print("imported ig?")
         for func_name, func in inspect.getmembers(module, inspect.isfunction):
-            if func.__module__ == module.__name__ and func_name == name:
-                registry.register(func_name, func)
-                print(f"[Main] Auto-registered: '{func_name}'")
+            if getattr(func, "_is_plugin", False):
+                registry.register(func.__name__, func)
+                print(f"[Main] Registered plugin: '{func.__name__}'")
 
 
 def start_daemon():
