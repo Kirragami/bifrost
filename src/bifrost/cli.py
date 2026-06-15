@@ -25,6 +25,9 @@ def cmd_link(args):
     print("Linking logic goes here...")
 
 def cmd_reload(args):
+    if len(args) != 0:
+        print("Usage: bifrost reload")
+        return 
     send_to_daemon('reload')
 
 def main():
