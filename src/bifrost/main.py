@@ -28,6 +28,7 @@ def start_daemon():
     print("[Bifrost] Starting daemon...")
     
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    # the security with this is a joke currently :'), fix in later versions
     socket_path = "/tmp/bifrost.sock"
     
     import os

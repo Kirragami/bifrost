@@ -2,6 +2,8 @@
 import socket
 import sys
 import os
+import subprocess
+import re
 
 def cmd_help(args):
     print("""Bifrost Lighting Engine - CLI Tool
@@ -12,6 +14,7 @@ Commands:
   link                   Creates a dev environment directory with symlinks to settings and plugins
   reload                 Force daemon to re-import plugins
   call <plugin-name>     Send a direct request to daemon to run a plugin
+  setudev                Let's you choose devices and writes udev rules for them. (This requires sudo password)
 """)
 
 def cmd_call(args):
@@ -51,6 +54,57 @@ def cmd_reload(args):
         return 
     send_to_daemon('reload')
 
+def cmd_setudev(args):
+    try:
+        lsusb_out = subprocess.run(["lsusb"], capture_output=True, text=True, check=True).stdout
+    except subprocess.CalledProcessError as e:
+        print(f"Error listing USB devices: {e}")
+        return
+
+    pattern = re.compile(r"ID ([0-9a-fA-F]{4}:[0-9a-fA-F]{4}) (.*)")
+    devices = [
+        {"id": m.group(1), "desc": m.group(2)} 
+        for m in (pattern.search(line) for line in lsusb_out.splitlines()) if m
+    ]
+
+    if not devices:
+        print("No USB devices found.")
+        return
+
+    print("Detected USB devices:")
+    for i, dev in enumerate(devices):
+        print(f"[{i}] {dev['desc']} ({dev['id']})")
+    
+
+    user_input = input("\nEnter the numbers of devices to setup (comma separated, e.g., 0, 2): ")
+    try:
+        indices = [int(x.strip()) for x in user_input.split(',')]
+        selected = [devices[i] for i in indices]
+    except (ValueError, IndexError):
+        print("Invalid selection. Please use the bracketed numbers.")
+        return
+
+
+    rules = []
+    for d in selected:
+        vid, pid = d['id'].split(':')
+        rules.append(f'SUBSYSTEM=="usb", ATTR{{idVendor}}=="{vid}", ATTR{{idProduct}}=="{pid}", MODE="0666"')
+    
+    rule_content = "\n".join(rules)
+    rule_path = "/etc/udev/rules.d/99-bifrost.rules"
+
+    
+    print(f"\nApplying permissions for selected devices...")
+
+    # massive security issues here, fix in later versions
+    cmd = f"echo '{rule_content}' | sudo tee {rule_path} && sudo udevadm control --reload-rules && sudo udevadm trigger"
+    
+    try:
+        subprocess.run(cmd, shell=True, check=True)
+        print(f"\nUdev rules written to {rule_path}.")
+    except subprocess.CalledProcessError:
+        print("\nSetup failed. Ensure you have sudo privileges and try again.")
+
 def main():
     if len(sys.argv) < 2:
         cmd_help(1)
@@ -60,7 +114,8 @@ def main():
         'help': cmd_help,
         'link': cmd_link,
         'reload': cmd_reload,
-        'call': cmd_call
+        'call': cmd_call,
+        'setudev': cmd_setudev
     }
 
     cmd_name = sys.argv[1]
