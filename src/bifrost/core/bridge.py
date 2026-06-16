@@ -1,8 +1,16 @@
+import subprocess
+import os
+import time
+from pathlib import Path
 from openrgb import OpenRGBClient
 from config import settings
+from .bifrostengine import BifrostEngine
 
 class Bridge:
     def __init__(self):
+        self.engine = BifrostEngine()
+        self.engine.start()
+
         self.client = OpenRGBClient()
         self.devices = self._map_devices()
 
