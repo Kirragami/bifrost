@@ -9,6 +9,8 @@ class BifrostEngine:
     def __init__(self):
         # please please take this out to settings.py later :'))
         self.binary_path = (Path(__file__).resolve().parents[3] / "assets" / "OpenRGB.AppImage")
+        self.host = '127.0.0.1'
+        self.port = 6742
         self.process = None
         atexit.register(self.stop)
 
@@ -16,10 +18,26 @@ class BifrostEngine:
     def start(self):
         if self.is_running():
             return
-        # make the port it runs on configurable in next patches
-        self.process = subprocess.Popen([str(self.binary_path), "--server"], start_new_session=True)
-        self._wait_for_server()
-        print(f"[Engine] Started at {self.binary_path}")
+        # Try until a port is available for instant startup
+        while not self._attempt_start_on_current_port():
+            self.port += 1
+            print(f"[Engine] Port {self.port-1} failed, trying {self.port}...")        
+        self._wait_for_server(port=self.port)
+        print((f"[Engine] Successfully started on port {self.port}"))
+
+    def _attempt_start_on_current_port(self):
+        self.process = subprocess.Popen(
+            [str(self.binary_path), "--server", "--server-port", str(self.port)],
+            start_new_session=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+        time.sleep(1)
+        if self.process.poll() is not None:
+            if "Could not bind" in self.process.stdout.read():
+                return False
+        return True
 
     def _wait_for_server(self, host='127.0.0.1', port=6742, timeout=10):
         start_time = time.time()

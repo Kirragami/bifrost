@@ -30,6 +30,7 @@ def flash(kb=None, mouse=None):
     original_colors = {}
     led_counts = {}
     for dev in devices:
+        dev.set_mode('direct')
         dev.update()
         original_colors[dev] = [RGBColor(c.red, c.green, c.blue) for c in dev.colors]
         led_counts[dev] = len(dev.colors)
@@ -51,6 +52,7 @@ def flash(kb=None, mouse=None):
 
     
     for dev in devices:
+        dev.set_mode('direct')
         dev.set_colors(original_colors[dev])
 
 @plugin

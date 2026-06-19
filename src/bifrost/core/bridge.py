@@ -11,7 +11,7 @@ class Bridge:
         self.engine = BifrostEngine()
         self.engine.start()
 
-        self.client = OpenRGBClient()
+        self.client = OpenRGBClient(self.engine.host, self.engine.port, 'Bifrost')
         self.devices = self._map_devices()
 
     def _map_devices(self):
