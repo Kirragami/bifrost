@@ -7,6 +7,7 @@ name = "bifrost"
 version = "0.1.0"
 dependencies = [
     "openrgb-python",
+    "pyudev"
 ]
 
 # This ensures all sub-packages (core, config, plugins) are found automatically
