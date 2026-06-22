@@ -3,6 +3,7 @@ import os
 import atexit
 import time
 import socket
+from config import settings
 from pathlib import Path
 
 class BifrostEngine:
@@ -10,7 +11,7 @@ class BifrostEngine:
         # please please take this out to settings.py later :'))
         self.binary_path = (Path(__file__).resolve().parents[3] / "assets" / "OpenRGB.AppImage")
         self.host = '127.0.0.1'
-        self.port = 6742
+        self.port = settings.PORT_RANGE_START
         self.process = None
         atexit.register(self.stop)
 
@@ -20,7 +21,10 @@ class BifrostEngine:
             return
         # Try until a port is available for instant startup
         while not self._attempt_start_on_current_port():
-            self.port += 1
+            if self.port == settings.PORT_RANGE_END:
+                self.port = settings.PORT_RANGE_START
+            else:
+                self.port += 1
             print(f"[Engine] Port {self.port-1} failed, trying {self.port}...")        
         self._wait_for_server(port=self.port)
         print((f"[Engine] Successfully started on port {self.port}"))
