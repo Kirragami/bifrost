@@ -2,7 +2,7 @@ import pyudev
 import threading
 
 class DeviceMonitor(threading.Thread):
-    def __init__(self, bridge:Bridge):
+    def __init__(self, bridge):
         super().__init__(daemon=True)
         self.bridge = bridge
         self.context = pyudev.Context()
