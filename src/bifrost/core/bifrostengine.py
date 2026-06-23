@@ -26,7 +26,6 @@ class BifrostEngine:
             else:
                 self.port += 1
             print(f"[Engine] Port {self.port-1} failed, trying {self.port}...")        
-        self._wait_for_server(port=self.port)
         print((f"[Engine] Successfully started on port {self.port}"))
 
     def _attempt_start_on_current_port(self):
@@ -37,20 +36,20 @@ class BifrostEngine:
             stderr=subprocess.STDOUT,
             text=True
         )
-        time.sleep(1)
-        if self.process.poll() is not None:
-            if "Could not bind" in self.process.stdout.read():
-                return False
-        return True
-
-    def _wait_for_server(self, host='127.0.0.1', port=6742, timeout=10):
-        start_time = time.time()
-        while time.time() - start_time < timeout:
+        start_poll = time.time()
+        timeout = 2.0
+        
+        while time.time() - start_poll < timeout:
+            if self.process.poll() is not None:
+                output = self.process.stdout.read()
+                if "Could not bind" in output:
+                    return False
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                if s.connect_ex((host, port)) == 0:
+                if s.connect_ex(('127.0.0.1', self.port)) == 0:
                     return True
-            time.sleep(0.5)
-        raise TimeoutError("[Engine] OpenRGB server failed to start in time.")
+            time.sleep(0.1)
+
+        return False
     
     def restart(self):
         self.stop()
