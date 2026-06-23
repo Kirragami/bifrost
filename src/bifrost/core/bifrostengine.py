@@ -3,6 +3,7 @@ import os
 import atexit
 import time
 import socket
+import signal
 from config import settings
 from pathlib import Path
 
@@ -13,7 +14,10 @@ class BifrostEngine:
         self.host = '127.0.0.1'
         self.port = settings.PORT_RANGE_START
         self.process = None
+
         atexit.register(self.stop)
+        signal.signal(signal.SIGTERM, self._signal_handler)
+        signal.signal(signal.SIGINT, self._signal_handler)
 
     
     def start(self):
@@ -55,10 +59,11 @@ class BifrostEngine:
         self.stop()
         self.start()
 
-    def stop(self):
-        if self.process:
+    def stop(self, *args):
+        if self.process and self.process.poll() is None:
             try:
-                os.killpg(os.getpgid(self.process.pid), 15) 
+                pgid = os.getpgid(self.process.pid)
+                os.killpg(pgid, signal.SIGKILL) 
                 self.process.wait(timeout=5)
             except (OSError, subprocess.TimeoutExpired):
                 try:
@@ -68,6 +73,10 @@ class BifrostEngine:
                     pass
             finally:
                 self.process = None
+
+    def _signal_handler(self, signum, frame):
+        self.stop()
+        exit(0)
     
     def is_running(self):
         return self.process and self.process.poll() is None
