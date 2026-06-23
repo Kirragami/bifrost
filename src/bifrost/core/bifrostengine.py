@@ -41,7 +41,7 @@ class BifrostEngine:
             text=True
         )
         start_poll = time.time()
-        timeout = 2.0
+        timeout = 10.0
         
         while time.time() - start_poll < timeout:
             if self.process.poll() is not None:
