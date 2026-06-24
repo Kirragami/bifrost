@@ -20,13 +20,15 @@ def register_plugins(registry):
                 print(f"[Main] Registered plugin: '{func.__name__}'")
 
             if getattr(func, "_run_at_start", False):
-                func(registry.bridge.client, registry.bridge.devices)
+                registry.bridge.startup_tasks.append(func)
+                print(f"[Registry] Registered startup task: {func}")
 
 
 def start_daemon():
     bridge = Bridge()
     registry = Registry(bridge)
     register_plugins(registry)
+    bridge.run_all_startups()
     
     print("[Bifrost] Starting daemon...")
     

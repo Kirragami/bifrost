@@ -63,7 +63,6 @@ class BifrostEngine:
         if self.process and self.process.poll() is None:
             try:
                 pgid = os.getpgid(self.process.pid)
-                print(f"Killing PID: {pgid}")
                 os.killpg(pgid, signal.SIGTERM)
                 os.killpg(pgid, signal.SIGKILL)
                 self.process.wait(timeout=5)

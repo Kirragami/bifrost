@@ -12,6 +12,7 @@ class Bridge:
         self.engine = BifrostEngine()
         self.engine.start()
 
+        self.startup_tasks = []
         self.client = OpenRGBClient(self.engine.host, self.engine.port, 'Bifrost')
         self.devices = self._map_devices()
         self.monitor = DeviceMonitor(self)
@@ -31,3 +32,8 @@ class Bridge:
         self.engine.restart()
         self.client = OpenRGBClient(self.engine.host, self.engine.port, 'Bifrost')
         self.devices = self._map_devices()
+        self.run_all_startups()
+
+    def run_all_startups(self):
+        for task in self.startup_tasks:
+            task(self.client, self.devices)

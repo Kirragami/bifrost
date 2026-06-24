@@ -2,6 +2,7 @@ class Registry:
     def __init__(self, bridge):
         self.bridge = bridge
         self._endpoints = {}
+        self.startup_tasks = []
     
     def register(self, name, func) :
         self._endpoints[name] = func
