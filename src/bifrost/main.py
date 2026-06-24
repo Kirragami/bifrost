@@ -4,6 +4,7 @@ import inspect
 import socket
 import os
 import bifrost.plugins
+import sys
 from bifrost.core.bridge import Bridge
 from bifrost.core.registry import Registry
 
@@ -13,7 +14,13 @@ def register_plugins(registry):
     importlib.reload(bifrost.plugins)
     registry.clear()
     for loader, name, is_pkg in pkgutil.iter_modules(bifrost.plugins.__path__):
-        module = importlib.import_module(f"bifrost.plugins.{name}")
+        module_name = f"bifrost.plugins.{name}"
+        if module_name in sys.modules:
+            importlib.reload(sys.modules[module_name])
+            module = sys.modules[module_name]
+        else:
+            module = importlib.import_module(module_name)
+
         for func_name, func in inspect.getmembers(module, inspect.isfunction):
             if getattr(func, "_is_plugin", False):
                 registry.register(func.__name__, func)
