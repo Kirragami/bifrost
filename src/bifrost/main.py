@@ -19,6 +19,9 @@ def register_plugins(registry):
                 registry.register(func.__name__, func)
                 print(f"[Main] Registered plugin: '{func.__name__}'")
 
+            if getattr(func, "_run_at_start", False):
+                func(registry.bridge.client, registry.bridge.devices)
+
 
 def start_daemon():
     bridge = Bridge()

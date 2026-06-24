@@ -18,3 +18,7 @@ class Registry:
 def plugin(func):
         func._is_plugin = True
         return func
+
+def startup(func):
+    func._run_at_start = True
+    return func
