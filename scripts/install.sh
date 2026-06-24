@@ -32,10 +32,11 @@ Description=Bifrost Hardware Engine
 After=graphical-session.target
 
 [Service]
-ExecStart=$APP_DIR/.venv/bin/python $APP_DIR/src/bifrost/main.py
+ExecStart=$APP_DIR/.venv/bin/python -u $APP_DIR/src/bifrost/main.py
 WorkingDirectory=$APP_DIR
 Restart=always
 RestartSec=5
+SyslogIdentifier=bifrost
 
 [Install]
 WantedBy=default.target
