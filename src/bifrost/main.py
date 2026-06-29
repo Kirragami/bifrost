@@ -28,7 +28,7 @@ def register_plugins(registry):
 
             if getattr(func, "_run_at_start", False):
                 registry.bridge.startup_tasks.append(func)
-                print(f"[Registry] Registered startup task: {func}")
+                print(f"[Registry] Registered startup task: {func_name}")
 
 
 def start_daemon():

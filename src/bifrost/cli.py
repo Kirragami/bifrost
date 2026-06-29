@@ -140,7 +140,6 @@ def send_to_daemon(command):
             sock.settimeout(2.0)
             sock.connect('/tmp/bifrost.sock')
             sock.sendall(command.encode())
-            print(f"Sent: {command}")
     except (FileNotFoundError, ConnectionRefusedError):
         print("Error: Bifrost daemon is not running.")
     except socket.timeout:
