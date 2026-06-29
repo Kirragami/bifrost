@@ -4,6 +4,7 @@ import inspect
 import socket
 import os
 import bifrost.plugins
+import traceback
 import sys
 from bifrost.core.bridge import Bridge
 from bifrost.core.registry import Registry
@@ -57,7 +58,12 @@ def start_daemon():
         if data == 'reload':
             register_plugins(registry)
         else:
-            registry.execute(data)
+            try:
+                registry.execute(data)
+            except Exception as e:
+                error_frame = traceback.extract_tb(e.__traceback__)[-1]
+                print(f"ERROR: {e} on line number {error_frame.lineno} of plugin {data}")
+
         conn.close()
 
 if __name__ == "__main__":
